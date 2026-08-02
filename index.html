@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#3E2A1E">
+  <title>Renovation Fitting & Cost Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #FAF8F5;
+      --bg-card: #FFFFFF;
+      --bg-subtle: #F2ECE1;
+      --border-color: #E2D7C5;
+      --primary-wood: #3E2A1E;
+      --secondary-wood: #5C4333;
+      --accent-rattan: #C4A988;
+      --accent-beige: #E6DEC8;
+      --olive-green: #5C6650;
+      --olive-light: #EBF0E8;
+      --text-main: #2C221E;
+      --text-muted: #706258;
+      --danger: #C0392B;
+      --shadow: 0 4px 20px rgba(62, 42, 30, 0.05);
+      --radius: 12px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding: 24px;
+      padding-top: calc(24px + var(--safe-top));
+      padding-bottom: calc(24px + var(--safe-bottom));
+      line-height: 1.5;
+    }
+
+    svg.icon { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; vertical-align: -3px; }
+
+    /* ---------- Header ---------- */
+    .header-panel {
+      background: linear-gradient(135deg, #3E2A1E 0%, #2A1B12 100%);
+      color: #FAF8F5;
+      padding: 28px 32px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 10px 25px rgba(42, 27, 18, 0.15);
+    }
+
+    .header-title { display: flex; align-items: center; gap: 10px; }
+    .header-title svg { width: 22px; height: 22px; stroke: var(--accent-rattan); flex-shrink: 0; }
+
+    .header-panel h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-panel p {
+      font-size: 0.85rem;
+      color: var(--accent-rattan);
+      margin-top: 4px;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      margin-top: 8px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      color: #D5C3A5;
+      border: 1px solid rgba(196,169,136,0.25);
+      letter-spacing: 0.3px;
+    }
+    .sync-pill svg { width: 11px; height: 11px; }
+
+    .budget-banner {
+      display: flex;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(196, 169, 136, 0.3);
+    }
+
+    .stat-box { text-align: right; cursor: default; }
+    .stat-box.editable { cursor: pointer; }
+    .stat-label { font-size: 0.72rem; text-transform: uppercase; color: #D5C3A5; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.25rem; font-weight: 700; color: #FFF; }
+    .stat-value input {
+      width: 120px; text-align: right; font-size: 1.1rem; font-weight: 700;
+      background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(196,169,136,0.5);
+      border-radius: 6px; padding: 2px 8px;
+    }
+
+    /* ---------- Summary cards ---------- */
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card h3 svg { width: 14px; height: 14px; stroke: var(--accent-rattan); }
+
+    .card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-wood);
+    }
+    .card .sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ---------- Controls ---------- */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-subtle);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-wrap { position: relative; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text-muted); }
+    .search-wrap input { padding-left: 32px; }
+
+    input, select, button, textarea {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      outline: none;
+      background-color: #FFF;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-wood);
+      box-shadow: 0 0 0 2px rgba(62, 42, 30, 0.1);
+    }
+
+    .btn {
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 40px;
+    }
+
+    .btn-primary { background-color: var(--primary-wood); color: #FFF; border: none; }
+    .btn-primary:hover { background-color: var(--secondary-wood); }
+    .btn-secondary { background-color: var(--olive-green); color: #FFF; border: none; }
+    .btn-secondary:hover { opacity: 0.9; }
+    .btn-outline { background-color: transparent; border: 1px solid var(--primary-wood); color: var(--primary-wood); }
+    .btn-outline:hover { background-color: var(--bg-subtle); }
+    .btn-icon { padding: 8px; min-height: 34px; min-width: 34px; justify-content: center; }
+    .btn-danger-outline { border-color: var(--danger); color: var(--danger); }
+
+    /* ---------- Category breakdown ---------- */
+    .category-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .cat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 16px; }
+    .cat-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 600; color: var(--primary-wood); gap: 8px; }
+    .cat-card-header .cat-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .cat-card-header .cat-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cat-card-header svg { stroke: var(--accent-rattan); width: 14px; height: 14px; }
+
+    .progress-bg { background-color: #EFECE6; height: 8px; border-radius: 4px; overflow: hidden; }
+    .progress-bar { background-color: var(--accent-rattan); height: 100%; border-radius: 4px; transition: width .3s; }
+
+    /* ---------- Table ---------- */
+    .table-container {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background-color: var(--bg-subtle); color: var(--primary-wood); font-weight: 600; padding: 12px 16px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    td { padding: 12px 16px; border-bottom: 1px solid #F2EBE1; vertical-align: middle; }
+    tr:hover { background-color: #FAF6F0; }
+
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; display: inline-block; white-space: nowrap; }
+    .badge-wishlist { background: #EFECE6; color: #665F57; }
+    .badge-to-order { background: #FDE8E4; color: #C0392B; }
+    .badge-ordered { background: #FEF3D6; color: #B7791F; }
+    .badge-delivered { background: #E1F0DA; color: #276749; }
+    .badge-installed { background: var(--olive-light); color: var(--olive-green); }
+
+    .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .row-actions button { padding: 6px; min-height: 30px; min-width: 30px; justify-content: center; }
+    .row-actions button svg { width: 14px; height: 14px; }
+
+    .empty-state { text-align: center; color: var(--text-muted); padding: 40px 20px; }
+
+    /* ---------- Modal (desktop: centered, mobile: bottom sheet) ---------- */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(44, 34, 30, 0.5);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Playfair Display', serif; color: var(--primary-wood); position: sticky; top: 0; background: var(--bg-card); }
+    .modal-header svg { width: 20px; height: 20px; cursor: pointer; stroke: var(--text-muted); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: span 2; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select { width: 100%; font-size: 16px; }
+
+    .modal-footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; position: sticky; bottom: 0; background: var(--bg-card); padding-top: 8px; }
+
+    /* ---------- Toast ---------- */
+    .toast {
+      position: fixed;
+      left: 50%; bottom: calc(24px + var(--safe-bottom));
+      transform: translate(-50%, 20px);
+      background: var(--primary-wood); color: #fff;
+      padding: 10px 18px; border-radius: 30px;
+      font-size: 0.82rem; display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      opacity: 0; pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast svg { width: 14px; height: 14px; stroke: var(--accent-rattan); }
+
+    /* ---------- Mobile FAB ---------- */
+    .fab {
+      display: none;
+      position: fixed;
+      right: 20px;
+      bottom: calc(20px + var(--safe-bottom));
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--primary-wood);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(62,42,30,0.35);
+      z-index: 90;
+      border: none;
+    }
+    .fab svg { width: 24px; height: 24px; }
+
+    .loading-screen {
+      position: fixed; inset: 0; background: var(--bg-main);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 10px; z-index: 999;
+      color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.5px;
+    }
+
+    /* ================= MOBILE ================= */
+    @media (max-width: 760px) {
+      body { padding: 14px; padding-top: calc(14px + var(--safe-top)); padding-bottom: calc(90px + var(--safe-bottom)); }
+
+      .header-panel { padding: 20px; flex-direction: column; align-items: flex-start; }
+      .header-panel h1 { font-size: 1.4rem; }
+      .budget-banner { width: 100%; justify-content: space-between; gap: 10px; }
+      .stat-box { text-align: left; }
+
+      .grid-summary { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .card { padding: 14px; }
+      .card .value { font-size: 1.15rem; }
+
+      .controls-bar { flex-direction: column; align-items: stretch; padding: 12px; }
+      .filter-group { width: 100%; }
+      .filter-group input, .filter-group select { flex: 1; min-width: 0; font-size: 16px; }
+      .search-wrap { width: 100%; }
+      .controls-bar .filter-group:last-child { display: none; } /* replaced by FAB + export moved into first group on mobile */
+
+      .mobile-export-row { display: flex; gap: 10px; width: 100%; }
+      .mobile-export-row .btn { flex: 1; justify-content: center; }
+
+      .category-breakdown { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Table -> stacked cards */
+      .table-container { overflow: visible; border: none; box-shadow: none; background: transparent; }
+      table, thead, tbody, th, tr, td { display: block; width: 100%; }
+      thead { display: none; }
+      table { border-spacing: 0 10px; }
+      tbody tr {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        margin-bottom: 10px;
+        padding: 12px 14px;
+        box-shadow: var(--shadow);
+      }
+      tbody tr:hover { background: var(--bg-card); }
+      td { border: none; padding: 6px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 0.85rem; }
+      td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.4px;
+        color: var(--text-muted); font-weight: 600; flex-shrink: 0; padding-top: 1px;
+      }
+      td.cell-item { display: block; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--border-color); }
+      td.cell-item::before { content: none; }
+      td.cell-item strong { font-size: 0.98rem; }
+      td.cell-actions { justify-content: flex-end; padding-top: 8px; }
+      td.cell-actions::before { content: none; }
+
+      /* Modal -> bottom sheet */
+      .modal { align-items: flex-end; }
+      .modal-content { max-width: 100%; max-height: 88vh; border-radius: 20px 20px 0 0; padding: 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: span 1; }
+      .modal-footer { flex-direction: column-reverse; }
+      .modal-footer .btn { width: 100%; justify-content: center; }
+
+      .fab { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="loading-screen" id="loading-screen">
+    <div>Loading your renovation schedule…</div>
+    <button id="loading-skip" class="btn btn-outline" style="display:none; margin-top:6px;" onclick="forceContinue()">Taking a while — tap to continue</button>
+  </div>
+
+  <!-- Header Panel -->
+  <div class="header-panel">
+    <div>
+      <div class="header-title">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <h1>16 Sierra Oakleaf Renovation</h1>
+      </div>
+      <p>Townhouse Renovation Fitting & Cost Management</p>
+      <div class="sync-pill" id="sync-pill">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="sync-pill-text">Checking storage…</span>
+      </div>
+      <button class="btn btn-outline" id="signout-btn" style="display:none;margin-top:8px;color:#fff;border-color:rgba(255,255,255,.35);" onclick="signOut()">Sign Out</button>
+    </div>
+    <div class="budget-banner">
+      <div class="stat-box editable" id="budget-stat-box" onclick="editBudget()">
+        <div class="stat-label">Target Budget (MYR)</div>
+        <div class="stat-value" id="target-budget-display">60,000</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Estimated Total</div>
+        <div class="stat-value" id="grand-total-display">0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid-summary">
+    <div class="card">
+      <h3>Total Estimated Cost</h3>
+      <div class="value" id="card-total">RM 0.00</div>
+      <div class="sub">Planned project cost</div>
+    </div>
+    <div class="card">
+      <h3>Actual Cost</h3>
+      <div class="value" id="card-actual">RM 0.00</div>
+      <div class="sub">Based on actual prices entered</div>
+    </div>
+    <div class="card">
+      <h3>Paid</h3>
+      <div class="value" id="card-paid">RM 0.00</div>
+      <div class="sub">Deposits + payments recorded</div>
+    </div>
+    <div class="card">
+      <h3>Outstanding</h3>
+      <div class="value" id="card-outstanding">RM 0.00</div>
+      <div class="sub">Actual cost less paid</div>
+    </div>
+    <div class="card">
+      <h3>Remaining Budget</h3>
+      <div class="value" id="card-variance" style="color: var(--olive-green);">RM 0.00</div>
+    </div>
+    <div class="card">
+      <h3>Items / Units</h3>
+      <div class="value" id="card-count">0</div>
+      <div class="sub" id="card-count-sub">0 units total</div>
+    </div>
+    <div class="card">
+      <h3>Ordered / Installed</h3>
+      <div class="value" id="card-ordered-count">0 / 0</div>
+      <div class="sub" id="card-ordered-units">0 units ordered</div>
+    </div>
+  </div>
+
+  <!-- Controls & Filtering -->
+  <div class="controls-bar">
+    <div class="filter-group">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search item, model, link..." oninput="renderApp()">
+      </div>
+
+      <select id="filter-category" onchange="renderApp()">
+        <option value="">All Categories</option>
+        <option value="Loose Furniture & Decor">Loose Furniture & Decor</option>
+        <option value="Electronics & Appliances">Electronics & Appliances</option>
+        <option value="HVAC & Smart Home">HVAC & Smart Home</option>
+        <option value="Fixtures & Sanitaryware">Fixtures & Sanitaryware</option>
+        <option value="Built-in Carpentry & Millwork">Built-in Carpentry & Millwork</option>
+        <option value="Finishes & Civil Works">Finishes & Civil Works</option>
+      </select>
+
+      <select id="filter-floor" onchange="renderApp()">
+        <option value="">All Floor Levels</option>
+        <option value="Ground Floor">Ground Floor</option>
+        <option value="First Floor">First Floor</option>
+        <option value="Both">Both / Whole House</option>
+      </select>
+
+      <select id="filter-status" onchange="renderApp()">
+        <option value="">All Statuses</option>
+        <option value="Wishlist">Wishlist</option>
+        <option value="To Order">To Order</option>
+        <option value="Ordered">Ordered</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Installed">Installed</option>
+      </select>
+
+      <div class="mobile-export-row">
+        <button class="btn btn-outline" onclick="exportCSV()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <button class="btn btn-outline" onclick="exportCSV()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add New Fitting
+      </button>
+    </div>
+  </div>
+
+  <!-- Category Breakdown Overview -->
+  <div class="category-breakdown" id="category-summary-container"></div>
+
+  <!-- Main Listing Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Item & Description</th>
+          <th>Category</th>
+          <th>Location / Room</th>
+          <th>Est. Unit Price (MYR)</th>
+          <th>Qty</th>
+          <th>Est. Total (MYR)</th>
+          <th>Actual Total (MYR)</th>
+          <th>Paid (MYR)</th>
+          <th>Status</th>
+          <th>Link / Vendor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="items-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Mobile floating add button -->
+  <button class="fab" onclick="openModal()" aria-label="Add new fitting">
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" id="itemModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Add New Fitting Item</h2>
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" onclick="closeModal()"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <form id="item-form" onsubmit="saveItem(event)">
+        <input type="hidden" id="item-id">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Item Name / Model</label>
+            <input type="text" id="item-name" required placeholder="e.g. KDK Ceiling Fan Sensa 4">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="item-category" required>
+              <option value="Loose Furniture & Decor">Loose Furniture & Decor</option>
+              <option value="Electronics & Appliances">Electronics & Appliances</option>
+              <option value="HVAC & Smart Home">HVAC & Smart Home</option>
+              <option value="Fixtures & Sanitaryware">Fixtures & Sanitaryware</option>
+              <option value="Built-in Carpentry & Millwork">Built-in Carpentry & Millwork</option>
+              <option value="Finishes & Civil Works">Finishes & Civil Works</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Floor Level</label>
+            <select id="item-floor" required>
+              <option value="Ground Floor">Ground Floor</option>
+              <option value="First Floor">First Floor</option>
+              <option value="Both">Both / Whole House</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Specific Room / Area</label>
+            <input type="text" id="item-room" placeholder="e.g. Living Room, Kitchen, Master Bedroom">
+          </div>
+          <div class="form-group">
+            <label>Unit Price (MYR)</label>
+            <input type="number" step="0.01" id="item-price" required placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="item-qty" value="1" min="1" required inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label>Actual Unit Price (MYR)</label>
+            <input type="number" step="0.01" id="item-actual-price" placeholder="Leave blank if not purchased" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Amount Paid (MYR)</label>
+            <input type="number" step="0.01" id="item-paid" value="0" min="0" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Payment Status</label>
+            <select id="item-payment-status">
+              <option value="Not Paid">Not Paid</option>
+              <option value="Deposit Paid">Deposit Paid</option>
+              <option value="Fully Paid">Fully Paid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="item-status">
+              <option value="Wishlist">Wishlist</option>
+              <option value="To Order">To Order</option>
+              <option value="Ordered">Ordered</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Installed">Installed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Vendor / Product Link</label>
+            <input type="text" id="item-link" placeholder="Brand or URL">
+          </div>
+          <div class="form-group full">
+            <label>Notes / Specifications</label>
+            <input type="text" id="item-notes" placeholder="Dimensions, color, finish detail...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <!-- Login / Signup -->
+  <div class="modal" id="authModal" style="display:none;">
+    <div class="modal-content" style="max-width:430px;">
+      <div class="modal-header"><h2>Renovation Tracker Login</h2></div>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:18px;">
+        Sign in to access the shared renovation tracker. Everyone using the same project database will see the same live data.
+      </p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="auth-email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>Password</label>
+          <input type="password" id="auth-password" required minlength="6" placeholder="At least 6 characters">
+        </div>
+        <div class="modal-footer" style="margin-top:18px;">
+          <button type="button" class="btn btn-outline" id="auth-signup">Create Account</button>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </div>
+      </form>
+      <p id="auth-message" style="font-size:.78rem;color:var(--text-muted);margin-top:12px;"></p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-text">Saved</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    /* ================================================================
+       DATA — initial dataset migrated from the user's Excel sheet
+       (Total RM 45,200 across the original 3 categories)
+    ================================================================= */
+    // ================================================================
+    // SUPABASE CONFIGURATION
+    // Replace these two placeholders with your Supabase Project URL
+    // and Publishable/Anon Key after creating your project.
+    // Never put a service_role/secret key in this file.
+    // ================================================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
+    const supabaseConfigured = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_KEY.startsWith('YOUR_');
+    const db = supabaseConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+    let items = [];
+    let targetBudget = 60000;
+    let currentUser = null;
+    let realtimeChannel = null;
+
+    const initialDataset = [
+      { id: 1, item: "Power Tracks (X5)", category: "HVAC & Smart Home", room: "Whole House / General", floor: "Both", unitPrice: 1300, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "Eubiq/ Schneider/ Zenso", status: "Wishlist", notes: "For living room & kitchen counters" },
+      { id: 2, item: "Washing Machine 10KG", category: "Electronics & Appliances", room: "Yard / Utility", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Utility area" },
+      { id: 3, item: "Kettle", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 100, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Aesthetic minimalist counter appliance" },
+      { id: 4, item: "Air Fryer", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Kitchen counter" },
+      { id: 5, item: "Coffee Machine", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 5000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Espresso machine for coffee nook" },
+      { id: 6, item: "Dining Table with Chairs", category: "Loose Furniture & Decor", room: "Dining Area", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Warm dark wood / Scandi style" },
+      { id: 7, item: "Built-in Oven", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 2500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "Electrolux 68/72L UltimateTaste™ 300", status: "Wishlist", notes: "Cabinet integrated" },
+      { id: 8, item: "Kitchen Sink and Tap", category: "Fixtures & Sanitaryware", room: "Kitchen", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Undermount dark composite / gunmetal tap" },
+      { id: 9, item: "Fridge", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Inverter multi-door" },
+      { id: 10, item: "Water Filter Outdoor", category: "Fixtures & Sanitaryware", room: "Yard / Outdoor", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Main incoming filtration" },
+      { id: 11, item: "65 inch TV", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 3500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Wall mounted minimal bezel" },
+      { id: 12, item: "Recliner Sofa", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Warm beige soft fabric" },
+      { id: 13, item: "KDK Ceiling Fan (Sensa 4)", category: "HVAC & Smart Home", room: "Living & Bedrooms", floor: "Both", unitPrice: 600, actualPrice: null, qty: 4, paid: 0, paymentStatus: "Not Paid", link: "KDK CEILING FAN-SENSA 4", status: "Wishlist", notes: "4 units across ground & upper bedrooms" },
+      { id: 14, item: "Sony Sound Bar 5.1", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Surround audio" },
+      { id: 15, item: "4 Seater Couch", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "NO LINK", status: "Wishlist", notes: "Low-profile linen/cotton texture" },
+      { id: 16, item: "Coffee Table", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 800, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Dark organic curve wood" },
+      { id: 17, item: "Inverter Aircon 1.0HP", category: "HVAC & Smart Home", room: "Bedrooms (Master, Bed 2, Bed 3)", floor: "Both", unitPrice: 1800, actualPrice: null, qty: 3, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "3 units for bedrooms" },
+      { id: 18, item: "Inverter Aircon 1.5HP", category: "HVAC & Smart Home", room: "Living Room", floor: "Ground Floor", unitPrice: 2200, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "1 unit for living hall" }
+    ];
+
+    function rowToItem(r) {
+      return {
+        id: r.id,
+        item: r.item,
+        category: r.category,
+        room: r.room || '',
+        floor: r.floor,
+        unitPrice: Number(r.unit_price || 0),
+        actualPrice: r.actual_price == null ? null : Number(r.actual_price),
+        qty: Number(r.qty || 1),
+        paid: Number(r.paid || 0),
+        paymentStatus: r.payment_status || 'Not Paid',
+        link: r.link || '',
+        status: r.status || 'Wishlist',
+        notes: r.notes || ''
+      };
+    }
+
+    function itemToRow(i) {
+      return {
+        id: i.id,
+        item: i.item,
+        category: i.category,
+        room: i.room || '',
+        floor: i.floor,
+        unit_price: Number(i.unitPrice || 0),
+        actual_price: i.actualPrice == null || i.actualPrice === '' ? null : Number(i.actualPrice),
+        qty: Number(i.qty || 1),
+        paid: Number(i.paid || 0),
+        payment_status: i.paymentStatus || 'Not Paid',
+        link: i.link || '',
+        status: i.status || 'Wishlist',
+        notes: i.notes || '',
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser ? currentUser.id : null
+      };
+    }
+
+    async function loadData() {
+      if (!supabaseConfigured) {
+        items = initialDataset;
+        setSyncPill(false);
+        document.getElementById('loading-screen').style.display = 'none';
+        renderApp();
+        showToast('Add your Supabase keys to enable shared live data');
+        return;
+      }
+
+      const { data: { session } } = await db.auth.getSession();
+      currentUser = session?.user || null;
+      document.getElementById('signout-btn').style.display = currentUser ? 'inline-flex' : 'none';
+      if (!currentUser) {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('authModal').style.display = 'flex';
+        setSyncPill(false);
+        return;
+      }
+
+      document.getElementById('authModal').style.display = 'none';
+      await refreshFromDatabase();
+      await subscribeToChanges();
+    }
+
+    async function refreshFromDatabase() {
+      const { data: itemRows, error: itemError } = await db
+        .from('renovation_items')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (itemError) {
+        console.error(itemError);
+        showToast('Could not load shared data');
+      } else if (itemRows && itemRows.length) {
+        items = itemRows.map(rowToItem);
+      } else {
+        // First user initializes the shared project with the existing dataset.
+        const rows = initialDataset.map(itemToRow);
+        const { error } = await db.from('renovation_items').insert(rows);
+        if (!error) items = initialDataset;
+      }
+
+      const { data: settings } = await db
+        .from('renovation_settings')
+        .select('target_budget')
+        .eq('id', 1)
+        .maybeSingle();
+
+      targetBudget = settings?.target_budget ?? 60000;
+      setSyncPill(true);
+      document.getElementById('loading-screen').style.display = 'none';
+      renderApp();
+    }
+
+    async function subscribeToChanges() {
+      if (realtimeChannel) await db.removeChannel(realtimeChannel);
+      realtimeChannel = db.channel('reno-live-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'renovation_items' }, async () => {
+          await refreshFromDatabase();
+          showToast('Updated by a collaborator');
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'renovation_settings' }, async () => {
+          await refreshFromDatabase();
+        })
+        .subscribe();
+    }
+
+    function setSyncPill(cloud) {
+      const text = document.getElementById('sync-pill-text');
+      text.textContent = cloud
+        ? `Live shared data • ${currentUser?.email || 'Signed in'}`
+        : 'Demo mode — Supabase not connected';
+    }
+
+    async function persist() {
+      if (!supabaseConfigured || !currentUser) {
+        showToast('Not connected to shared database');
+        return;
+      }
+      const rows = items.map(itemToRow);
+      const { error } = await db.from('renovation_items').upsert(rows);
+      if (error) {
+        console.error(error);
+        showToast('Could not save shared data');
+        return;
+      }
+      await db.from('renovation_settings').upsert({
+        id: 1,
+        target_budget: Number(targetBudget),
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser.id
+      });
+      showToast('Saved to shared tracker');
+    }
+
+    async function saveSingleItem(item) {
+      const { error } = await db.from('renovation_items').upsert(itemToRow(item));
+      if (error) throw error;
+    }
+
+    async function deleteSingleItem(id) {
+      const { error } = await db.from('renovation_items').delete().eq('id', id);
+      if (error) throw error;
+    }
+
+    function signOut() {
+      if (db) db.auth.signOut();
+    }
+
+    // Auth
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!db) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const msg = document.getElementById('auth-message');
+      msg.textContent = 'Signing in…';
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      msg.textContent = error ? error.message : 'Signed in.';
+      if (!error) await loadData();
+    });
+
+    document.getElementById('auth-signup').addEventListener('click', async () => {
+      if (!db) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const msg = document.getElementById('auth-message');
+      if (!email || password.length < 6) {
+        msg.textContent = 'Enter an email and a password of at least 6 characters.';
+        return;
+      }
+      msg.textContent = 'Creating account…';
+      const { error } = await db.auth.signUp({ email, password });
+      msg.textContent = error ? error.message : 'Account created. Check your email if confirmation is enabled.';
+    });
+
+    db?.auth.onAuthStateChange(async (_event, session) => {
+      currentUser = session?.user || null;
+      document.getElementById('signout-btn').style.display = currentUser ? 'inline-flex' : 'none';
+      if (currentUser) {
+        document.getElementById('authModal').style.display = 'none';
+        await refreshFromDatabase();
+        await subscribeToChanges();
+      }
+    });
+
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    /* ================================================================
+       RENDER
+    ================================================================= */
+    function renderApp() {
+      const searchQuery = document.getElementById('search-input').value.toLowerCase();
+      const catFilter = document.getElementById('filter-category').value;
+      const floorFilter = document.getElementById('filter-floor').value;
+      const statusFilter = document.getElementById('filter-status').value;
+
+      const filtered = items.filter(item => {
+        const matchesSearch = item.item.toLowerCase().includes(searchQuery) ||
+                              item.room.toLowerCase().includes(searchQuery) ||
+                              (item.link && item.link.toLowerCase().includes(searchQuery));
+        const matchesCat = !catFilter || item.category === catFilter;
+        const matchesFloor = !floorFilter || item.floor === floorFilter;
+        const matchesStatus = !statusFilter || item.status === statusFilter;
+        return matchesSearch && matchesCat && matchesFloor && matchesStatus;
+      });
+
+      const estimatedTotal = items.reduce((sum, item) => sum + (Number(item.unitPrice || 0) * Number(item.qty || 0)), 0);
+      const actualTotal = items.reduce((sum, item) => sum + ((item.actualPrice == null ? 0 : Number(item.actualPrice)) * Number(item.qty || 0)), 0);
+      const paidTotal = items.reduce((sum, item) => sum + Number(item.paid || 0), 0);
+      const outstanding = Math.max(0, actualTotal - paidTotal);
+      const variance = targetBudget - estimatedTotal;
+      const totalUnits = items.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+      const orderedItems = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).length;
+      const orderedUnits = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).reduce((sum,i) => sum + Number(i.qty || 0), 0);
+
+      document.getElementById('target-budget-display').innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
+      document.getElementById('grand-total-display').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-total').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-actual').innerText = 'RM ' + actualTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-paid').innerText = 'RM ' + paidTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-outstanding').innerText = 'RM ' + outstanding.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-variance').innerText = 'RM ' + variance.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-variance').style.color = variance < 0 ? 'var(--danger)' : 'var(--olive-green)';
+      document.getElementById('card-count').innerText = items.length;
+      document.getElementById('card-count-sub').innerText = totalUnits + ' units total';
+      document.getElementById('card-ordered-count').innerText = `${orderedItems} / ${items.length}`;
+      document.getElementById('card-ordered-units').innerText = `${orderedUnits} units ordered / delivered / installed`;
+
+      renderCategorySummary(estimatedTotal);
+
+      const tbody = document.getElementById('items-tbody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">No fittings match your filters.</div></td></tr>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const rowTotal = Number(item.unitPrice || 0) * Number(item.qty || 0);
+        const actualTotal = (item.actualPrice == null ? 0 : Number(item.actualPrice)) * Number(item.qty || 0);
+        const statusClass = `badge-${item.status.toLowerCase().replace(/\s+/g, '-')}`;
+
+        let linkDisplay = '—';
+        if (item.link) {
+          if (item.link.startsWith('http')) {
+            linkDisplay = `<a href="${item.link}" target="_blank" style="color: var(--primary-wood); text-decoration: underline;">View link</a>`;
+          } else {
+            linkDisplay = item.link;
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="cell-item">
+            <strong>${escapeHtml(item.item)}</strong>
+            ${item.notes ? `<br><small style="color: var(--text-muted);">${escapeHtml(item.notes)}</small>` : ''}
+          </td>
+          <td data-label="Category"><small>${escapeHtml(item.category)}</small></td>
+          <td data-label="Room"><strong>${escapeHtml(item.room)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(item.floor)}</small></td>
+          <td data-label="Unit Price">RM ${item.unitPrice.toLocaleString('en-MY', {minimumFractionDigits: 2})}</td>
+          <td data-label="Qty">${item.qty}</td>
+          <td data-label="Total"><strong>RM ${rowTotal.toLocaleString('en-MY', {minimumFractionDigits: 2})}</strong></td>
+          <td data-label="Actual"><strong>${item.actualPrice == null ? '—' : 'RM ' + actualTotal.toLocaleString('en-MY', {minimumFractionDigits: 2})}</strong></td>
+          <td data-label="Paid">RM ${Number(item.paid || 0).toLocaleString('en-MY', {minimumFractionDigits: 2})}</td>
+          <td data-label="Status"><span class="badge ${statusClass}">${item.status}</span></td>
+          <td data-label="Link"><small>${linkDisplay}</small><br><small style="color:var(--text-muted);">${escapeHtml(item.paymentStatus || 'Not Paid')}</small></td>
+          <td class="cell-actions">
+            <div class="row-actions">
+              <button class="btn btn-outline btn-icon" onclick="editItem(${item.id})" aria-label="Edit">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </button>
+              <button class="btn btn-outline btn-icon btn-danger-outline" onclick="deleteItem(${item.id})" aria-label="Delete">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : str;
+      return div.innerHTML;
+    }
+
+    function renderCategorySummary(grandTotal) {
+      const categories = [
+        "Loose Furniture & Decor",
+        "Electronics & Appliances",
+        "HVAC & Smart Home",
+        "Fixtures & Sanitaryware",
+        "Built-in Carpentry & Millwork",
+        "Finishes & Civil Works"
+      ];
+
+      const container = document.getElementById('category-summary-container');
+      container.innerHTML = '';
+
+      categories.forEach(cat => {
+        const catItems = items.filter(i => i.category === cat);
+        const catTotal = catItems.reduce((sum, i) => sum + (i.unitPrice * i.qty), 0);
+        const percentage = grandTotal > 0 ? ((catTotal / grandTotal) * 100).toFixed(1) : 0;
+
+        if (catTotal > 0) {
+          const div = document.createElement('div');
+          div.className = 'cat-card';
+          div.innerHTML = `
+            <div class="cat-card-header">
+              <span class="cat-name">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/></svg>
+                <span>${cat}</span>
+              </span>
+              <span>RM ${catTotal.toLocaleString('en-MY', {minimumFractionDigits: 0})}</span>
+            </div>
+            <div class="progress-bg">
+              <div class="progress-bar" style="width: ${percentage}%;"></div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between;">
+              <span>${catItems.length} item types</span>
+              <span>${percentage}% of total</span>
+            </div>
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+
+    /* ================================================================
+       BUDGET EDIT
+    ================================================================= */
+    function editBudget() {
+      const box = document.getElementById('budget-stat-box');
+      if (box.querySelector('input')) return;
+      const display = document.getElementById('target-budget-display');
+      const current = targetBudget;
+      display.innerHTML = `<input type="number" id="budget-input" value="${current}" inputmode="decimal">`;
+      const input = document.getElementById('budget-input');
+      input.focus();
+      input.select();
+      const commit = () => {
+        const val = parseFloat(input.value);
+        targetBudget = isNaN(val) ? current : val;
+        display.innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
+        persist();
+        renderApp();
+      };
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+      input.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    /* ================================================================
+       MODAL / CRUD
+    ================================================================= */
+    function openModal(editId = null) {
+      document.getElementById('item-form').reset();
+      document.getElementById('item-id').value = '';
+      document.getElementById('modal-title').innerText = 'Add New Fitting Item';
+
+      if (editId) {
+        const item = items.find(i => i.id === editId);
+        if (item) {
+          document.getElementById('modal-title').innerText = 'Edit Fitting Item';
+          document.getElementById('item-id').value = item.id;
+          document.getElementById('item-name').value = item.item;
+          document.getElementById('item-category').value = item.category;
+          document.getElementById('item-floor').value = item.floor;
+          document.getElementById('item-room').value = item.room;
+          document.getElementById('item-price').value = item.unitPrice;
+          document.getElementById('item-qty').value = item.qty;
+          document.getElementById('item-actual-price').value = item.actualPrice ?? '';
+          document.getElementById('item-paid').value = item.paid ?? 0;
+          document.getElementById('item-payment-status').value = item.paymentStatus || 'Not Paid';
+          document.getElementById('item-status').value = item.status;
+          document.getElementById('item-link').value = item.link || '';
+          document.getElementById('item-notes').value = item.notes || '';
+        }
+      }
+      document.getElementById('itemModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('itemModal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    async function saveItem(event) {
+      event.preventDefault();
+      if (!currentUser) {
+        showToast('Please sign in first');
+        return;
+      }
+
+      const id = document.getElementById('item-id').value;
+      const newItem = {
+        id: id ? parseInt(id) : Date.now(),
+        item: document.getElementById('item-name').value.trim(),
+        category: document.getElementById('item-category').value,
+        floor: document.getElementById('item-floor').value,
+        room: document.getElementById('item-room').value.trim(),
+        unitPrice: parseFloat(document.getElementById('item-price').value) || 0,
+        actualPrice: document.getElementById('item-actual-price').value === '' ? null : parseFloat(document.getElementById('item-actual-price').value),
+        qty: parseInt(document.getElementById('item-qty').value) || 1,
+        paid: parseFloat(document.getElementById('item-paid').value) || 0,
+        paymentStatus: document.getElementById('item-payment-status').value,
+        status: document.getElementById('item-status').value,
+        link: document.getElementById('item-link').value.trim(),
+        notes: document.getElementById('item-notes').value.trim()
+      };
+
+      try {
+        await saveSingleItem(newItem);
+        const index = items.findIndex(i => i.id === newItem.id);
+        if (index !== -1) items[index] = newItem;
+        else items.push(newItem);
+        closeModal();
+        renderApp();
+        showToast('Saved to shared tracker');
+      } catch (e) {
+        console.error(e);
+        showToast('Could not save item');
+      }
+    }
+
+    function editItem(id) { openModal(id); }
+
+    async function deleteItem(id) {
+      if (!confirm('Are you sure you want to delete this fitting item?')) return;
+      try {
+        await deleteSingleItem(id);
+        items = items.filter(i => i.id !== id);
+        renderApp();
+        showToast('Deleted from shared tracker');
+      } catch (e) {
+        console.error(e);
+        showToast('Could not delete item');
+      }
+    }
+
+    function exportCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Item,Category,Floor Level,Room/Location,Estimated Unit Price (MYR),Quantity,Estimated Total (MYR),Actual Unit Price (MYR),Actual Total (MYR),Paid (MYR),Payment Status,Status,Link/Vendor,Notes\n";
+
+      items.forEach(i => {
+        const total = i.unitPrice * i.qty;
+        const row = [
+          `"${i.item.replace(/"/g, '""')}"`,
+          `"${i.category}"`,
+          `"${i.floor}"`,
+          `"${i.room}"`,
+          i.unitPrice,
+          i.qty,
+          total,
+          i.actualPrice == null ? '' : i.actualPrice,
+          i.actualPrice == null ? '' : (i.actualPrice * i.qty),
+          i.paid || 0,
+          `"${i.paymentStatus || 'Not Paid'}"`,
+          `"${i.status}"`,
+          `"${(i.link || '').replace(/"/g, '""')}"`,
+          `"${(i.notes || '').replace(/"/g, '""')}"`
+        ].join(",");
+        csvContent += row + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Renovation_Fitting_Cost_Tracker.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV exported');
+    }
+
+    // Close modal on backdrop click (mobile-friendly)
+    document.getElementById('itemModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+
+/*
+SUPABASE SQL SETUP (run this in Supabase SQL Editor)
+
+create table if not exists public.renovation_items (
+  id bigint primary key,
+  item text not null,
+  category text not null,
+  floor text not null,
+  room text default '',
+  unit_price numeric(12,2) not null default 0,
+  actual_price numeric(12,2),
+  qty integer not null default 1,
+  paid numeric(12,2) not null default 0,
+  payment_status text not null default 'Not Paid',
+  status text not null default 'Wishlist',
+  link text default '',
+  notes text default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id)
+);
+
+create table if not exists public.renovation_settings (
+  id integer primary key,
+  target_budget numeric(12,2) not null default 60000,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id)
+);
+
+insert into public.renovation_settings (id, target_budget)
+values (1, 60000)
+on conflict (id) do nothing;
+
+alter table public.renovation_items enable row level security;
+alter table public.renovation_settings enable row level security;
+
+create policy "authenticated users can read items"
+on public.renovation_items for select to authenticated using (true);
+
+create policy "authenticated users can insert items"
+on public.renovation_items for insert to authenticated with check (true);
+
+create policy "authenticated users can update items"
+on public.renovation_items for update to authenticated using (true) with check (true);
+
+create policy "authenticated users can delete items"
+on public.renovation_items for delete to authenticated using (true);
+
+create policy "authenticated users can read settings"
+on public.renovation_settings for select to authenticated using (true);
+
+create policy "authenticated users can insert settings"
+on public.renovation_settings for insert to authenticated with check (true);
+
+create policy "authenticated users can update settings"
+on public.renovation_settings for update to authenticated using (true) with check (true);
+
+alter publication supabase_realtime add table public.renovation_items;
+alter publication supabase_realtime add table public.renovation_settings;
+*/
+
+    loadData();
+  </script>
+</body>
+</html>
