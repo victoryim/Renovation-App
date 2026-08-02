@@ -672,8 +672,8 @@
     // and Publishable/Anon Key after creating your project.
     // Never put a service_role/secret key in this file.
     // ================================================================
-    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-    const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
+    const SUPABASE_URL = 'https://vtylwnaygpsuqtgllfvg.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_hiiVfwMBFEb4mPR9PSibuQ_4ullCBm5';
     const supabaseConfigured = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_KEY.startsWith('YOUR_');
     const db = supabaseConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
