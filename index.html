@@ -247,7 +247,7 @@
 
     .empty-state { text-align: center; color: var(--text-muted); padding: 40px 20px; }
 
-    /* ---------- Modal (desktop: centered, mobile: bottom sheet) ---------- */
+    /* ---------- Modal ---------- */
     .modal {
       display: none;
       position: fixed;
@@ -271,7 +271,7 @@
       border: 1px solid var(--border-color);
     }
 
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Playfair Display', serif; color: var(--primary-wood); position: sticky; top: 0; background: var(--bg-card); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-family: 'Playfair Display', serif; color: var(--primary-wood); position: sticky; top: 0; background: var(--bg-card); z-index: 5; }
     .modal-header svg { width: 20px; height: 20px; cursor: pointer; stroke: var(--text-muted); }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -340,7 +340,7 @@
       .filter-group { width: 100%; }
       .filter-group input, .filter-group select { flex: 1; min-width: 0; font-size: 16px; }
       .search-wrap { width: 100%; }
-      .controls-bar .filter-group:last-child { display: none; } /* replaced by FAB + export moved into first group on mobile */
+      .controls-bar .filter-group:last-child { display: none; }
 
       .mobile-export-row { display: flex; gap: 10px; width: 100%; }
       .mobile-export-row .btn { flex: 1; justify-content: center; }
@@ -373,7 +373,6 @@
       td.cell-actions { justify-content: flex-end; padding-top: 8px; }
       td.cell-actions::before { content: none; }
 
-      /* Modal -> bottom sheet */
       .modal { align-items: flex-end; }
       .modal-content { max-width: 100%; max-height: 88vh; border-radius: 20px 20px 0 0; padding: 20px; }
       .form-grid { grid-template-columns: 1fr; }
@@ -389,7 +388,7 @@
 
   <div class="loading-screen" id="loading-screen">
     <div>Loading your renovation schedule…</div>
-    <button id="loading-skip" class="btn btn-outline" style="display:none; margin-top:6px;" onclick="forceContinue()">Taking a while — tap to continue</button>
+    <button id="loading-skip" class="btn btn-outline" style="display:inline-block; margin-top:12px;" onclick="forceContinue()">Taking a while — tap to continue</button>
   </div>
 
   <!-- Header Panel -->
@@ -404,11 +403,12 @@
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span id="sync-pill-text">Checking storage…</span>
       </div>
+      <button class="btn btn-outline" id="signout-btn" style="display:none;margin-top:8px;color:#fff;border-color:rgba(255,255,255,.35);" onclick="signOut()">Sign Out</button>
     </div>
     <div class="budget-banner">
       <div class="stat-box editable" id="budget-stat-box" onclick="editBudget()">
         <div class="stat-label">Target Budget (MYR)</div>
-        <div class="stat-value" id="target-budget-display">RM 60,000</div>
+        <div class="stat-value" id="target-budget-display">60,000</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Estimated Total</div>
@@ -420,21 +420,38 @@
   <!-- Summary Cards -->
   <div class="grid-summary">
     <div class="card">
-      <h3><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/></svg>Total Estimated Cost</h3>
+      <h3>Total Estimated Cost</h3>
       <div class="value" id="card-total">RM 0.00</div>
+      <div class="sub">Planned project cost</div>
     </div>
     <div class="card">
-      <h3><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Remaining Budget</h3>
+      <h3>Actual Cost</h3>
+      <div class="value" id="card-actual">RM 0.00</div>
+      <div class="sub">Based on actual prices entered</div>
+    </div>
+    <div class="card">
+      <h3>Paid</h3>
+      <div class="value" id="card-paid">RM 0.00</div>
+      <div class="sub">Deposits + payments recorded</div>
+    </div>
+    <div class="card">
+      <h3>Outstanding</h3>
+      <div class="value" id="card-outstanding">RM 0.00</div>
+      <div class="sub">Actual cost less paid</div>
+    </div>
+    <div class="card">
+      <h3>Remaining Budget</h3>
       <div class="value" id="card-variance" style="color: var(--olive-green);">RM 0.00</div>
     </div>
     <div class="card">
-      <h3><svg class="icon" viewBox="0 0 24 24"><path d="M16.5 9.4L7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Fitting Items</h3>
+      <h3>Items / Units</h3>
       <div class="value" id="card-count">0</div>
       <div class="sub" id="card-count-sub">0 units total</div>
     </div>
     <div class="card">
-      <h3><svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Purchased / Ordered</h3>
+      <h3>Ordered / Installed</h3>
       <div class="value" id="card-ordered-count">0 / 0</div>
+      <div class="sub" id="card-ordered-units">0 units ordered</div>
     </div>
   </div>
 
@@ -503,9 +520,11 @@
           <th>Item & Description</th>
           <th>Category</th>
           <th>Location / Room</th>
-          <th>Unit Price (MYR)</th>
+          <th>Est. Unit Price (MYR)</th>
           <th>Qty</th>
-          <th>Total Cost (MYR)</th>
+          <th>Est. Total (MYR)</th>
+          <th>Actual Total (MYR)</th>
+          <th>Paid (MYR)</th>
           <th>Status</th>
           <th>Link / Vendor</th>
           <th>Actions</th>
@@ -566,6 +585,22 @@
             <input type="number" id="item-qty" value="1" min="1" required inputmode="numeric">
           </div>
           <div class="form-group">
+            <label>Actual Unit Price (MYR)</label>
+            <input type="number" step="0.01" id="item-actual-price" placeholder="Leave blank if not purchased" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Amount Paid (MYR)</label>
+            <input type="number" step="0.01" id="item-paid" value="0" min="0" inputmode="decimal">
+          </div>
+          <div class="form-group">
+            <label>Payment Status</label>
+            <select id="item-payment-status">
+              <option value="Not Paid">Not Paid</option>
+              <option value="Deposit Paid">Deposit Paid</option>
+              <option value="Fully Paid">Fully Paid</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label>Status</label>
             <select id="item-status">
               <option value="Wishlist">Wishlist</option>
@@ -592,171 +627,247 @@
     </div>
   </div>
 
+  <!-- Login / Signup -->
+  <div class="modal" id="authModal" style="display:none;">
+    <div class="modal-content" style="max-width:430px;">
+      <div class="modal-header"><h2>Renovation Tracker Login</h2></div>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:18px;">
+        Sign in to access the shared renovation tracker. Everyone using the same project database will see the same live data.
+      </p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="auth-email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>Password</label>
+          <input type="password" id="auth-password" required minlength="6" placeholder="At least 6 characters">
+        </div>
+        <div class="modal-footer" style="margin-top:18px;">
+          <button type="button" class="btn btn-outline" id="auth-signup">Create Account</button>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </div>
+      </form>
+      <p id="auth-message" style="font-size:.78rem;color:var(--text-muted);margin-top:12px;"></p>
+    </div>
+  </div>
+
   <div class="toast" id="toast">
     <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="toast-text">Saved</span>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    /* ================================================================
-       DATA — initial dataset migrated from the user's Excel sheet
-       (Total RM 45,200 across the original 3 categories)
-    ================================================================= */
-    const initialDataset = [
-      { id: 1, item: "Power Tracks (X5)", category: "HVAC & Smart Home", room: "Whole House / General", floor: "Both", unitPrice: 1300, qty: 1, link: "Eubiq/ Schneider/ Zenso", status: "Wishlist", notes: "For living room & kitchen counters" },
-      { id: 2, item: "Washing Machine 10KG", category: "Electronics & Appliances", room: "Yard / Utility", floor: "Ground Floor", unitPrice: 1500, qty: 1, link: "", status: "Wishlist", notes: "Utility area" },
-      { id: 3, item: "Kettle", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 100, qty: 1, link: "", status: "Wishlist", notes: "Aesthetic minimalist counter appliance" },
-      { id: 4, item: "Air Fryer", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 500, qty: 1, link: "", status: "Wishlist", notes: "Kitchen counter" },
-      { id: 5, item: "Coffee Machine", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 5000, qty: 1, link: "", status: "Wishlist", notes: "Espresso machine for coffee nook" },
-      { id: 6, item: "Dining Table with Chairs", category: "Loose Furniture & Decor", room: "Dining Area", floor: "Ground Floor", unitPrice: 3000, qty: 1, link: "", status: "Wishlist", notes: "Warm dark wood / Scandi style" },
-      { id: 7, item: "Built-in Oven", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 2500, qty: 1, link: "Electrolux 68/72L UltimateTaste™ 300", status: "Wishlist", notes: "Cabinet integrated" },
-      { id: 8, item: "Kitchen Sink and Tap", category: "Fixtures & Sanitaryware", room: "Kitchen", floor: "Ground Floor", unitPrice: 1500, qty: 1, link: "", status: "Wishlist", notes: "Undermount dark composite / gunmetal tap" },
-      { id: 9, item: "Fridge", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 3000, qty: 1, link: "", status: "Wishlist", notes: "Inverter multi-door" },
-      { id: 10, item: "Water Filter Outdoor", category: "Fixtures & Sanitaryware", room: "Yard / Outdoor", floor: "Ground Floor", unitPrice: 3000, qty: 1, link: "", status: "Wishlist", notes: "Main incoming filtration" },
-      { id: 11, item: "65 inch TV", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 3500, qty: 1, link: "", status: "Wishlist", notes: "Wall mounted minimal bezel" },
-      { id: 12, item: "Recliner Sofa", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, qty: 1, link: "", status: "Wishlist", notes: "Warm beige soft fabric" },
-      { id: 13, item: "KDK Ceiling Fan (Sensa 4)", category: "HVAC & Smart Home", room: "Living & Bedrooms", floor: "Both", unitPrice: 600, qty: 4, link: "KDK CEILING FAN-SENSA 4", status: "Wishlist", notes: "4 units across ground & upper bedrooms" },
-      { id: 14, item: "Sony Sound Bar 5.1", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 1500, qty: 1, link: "", status: "Wishlist", notes: "Surround audio" },
-      { id: 15, item: "4 Seater Couch", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, qty: 1, link: "NO LINK", status: "Wishlist", notes: "Low-profile linen/cotton texture" },
-      { id: 16, item: "Coffee Table", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 800, qty: 1, link: "", status: "Wishlist", notes: "Dark organic curve wood" },
-      { id: 17, item: "Inverter Aircon 1.0HP", category: "HVAC & Smart Home", room: "Bedrooms (Master, Bed 2, Bed 3)", floor: "Both", unitPrice: 1800, qty: 3, link: "", status: "Wishlist", notes: "3 units for bedrooms" },
-      { id: 18, item: "Inverter Aircon 1.5HP", category: "HVAC & Smart Home", room: "Living Room", floor: "Ground Floor", unitPrice: 2200, qty: 1, link: "", status: "Wishlist", notes: "1 unit for living hall" }
-    ];
+    // ================================================================
+    // SUPABASE CONFIGURATION
+    // ================================================================
+    const SUPABASE_URL = 'https://vtylwnaygpsuqtgllfvg.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_hiiVfwMBFEb4mPR9PSibuQ_4ullCBm5';
+    const supabaseConfigured = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_KEY.startsWith('YOUR_');
+    const db = supabaseConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
     let items = [];
     let targetBudget = 60000;
-    const STORAGE_ITEMS_KEY = 'reno_fitting_items';
-    const STORAGE_BUDGET_KEY = 'reno_target_budget';
-    const hasCloudStorage = typeof window.storage !== 'undefined' && window.storage;
+    let currentUser = null;
+    let realtimeChannel = null;
+
+    const initialDataset = [
+      { id: 1, item: "Power Tracks (X5)", category: "HVAC & Smart Home", room: "Whole House / General", floor: "Both", unitPrice: 1300, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "Eubiq/ Schneider/ Zenso", status: "Wishlist", notes: "For living room & kitchen counters" },
+      { id: 2, item: "Washing Machine 10KG", category: "Electronics & Appliances", room: "Yard / Utility", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Utility area" },
+      { id: 3, item: "Kettle", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 100, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Aesthetic minimalist counter appliance" },
+      { id: 4, item: "Air Fryer", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Kitchen counter" },
+      { id: 5, item: "Coffee Machine", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 5000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Espresso machine for coffee nook" },
+      { id: 6, item: "Dining Table with Chairs", category: "Loose Furniture & Decor", room: "Dining Area", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Warm dark wood / Scandi style" },
+      { id: 7, item: "Built-in Oven", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 2500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "Electrolux 68/72L UltimateTaste™ 300", status: "Wishlist", notes: "Cabinet integrated" },
+      { id: 8, item: "Kitchen Sink and Tap", category: "Fixtures & Sanitaryware", room: "Kitchen", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Undermount dark composite / gunmetal tap" },
+      { id: 9, item: "Fridge", category: "Electronics & Appliances", room: "Kitchen", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Inverter multi-door" },
+      { id: 10, item: "Water Filter Outdoor", category: "Fixtures & Sanitaryware", room: "Yard / Outdoor", floor: "Ground Floor", unitPrice: 3000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Main incoming filtration" },
+      { id: 11, item: "65 inch TV", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 3500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Wall mounted minimal bezel" },
+      { id: 12, item: "Recliner Sofa", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Warm beige soft fabric" },
+      { id: 13, item: "KDK Ceiling Fan (Sensa 4)", category: "HVAC & Smart Home", room: "Living & Bedrooms", floor: "Both", unitPrice: 600, actualPrice: null, qty: 4, paid: 0, paymentStatus: "Not Paid", link: "KDK CEILING FAN-SENSA 4", status: "Wishlist", notes: "4 units across ground & upper bedrooms" },
+      { id: 14, item: "Sony Sound Bar 5.1", category: "Electronics & Appliances", room: "Living Room", floor: "Ground Floor", unitPrice: 1500, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Surround audio" },
+      { id: 15, item: "4 Seater Couch", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 4000, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "NO LINK", status: "Wishlist", notes: "Low-profile linen/cotton texture" },
+      { id: 16, item: "Coffee Table", category: "Loose Furniture & Decor", room: "Living Room", floor: "Ground Floor", unitPrice: 800, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "Dark organic curve wood" },
+      { id: 17, item: "Inverter Aircon 1.0HP", category: "HVAC & Smart Home", room: "Bedrooms (Master, Bed 2, Bed 3)", floor: "Both", unitPrice: 1800, actualPrice: null, qty: 3, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "3 units for bedrooms" },
+      { id: 18, item: "Inverter Aircon 1.5HP", category: "HVAC & Smart Home", room: "Living Room", floor: "Ground Floor", unitPrice: 2200, actualPrice: null, qty: 1, paid: 0, paymentStatus: "Not Paid", link: "", status: "Wishlist", notes: "1 unit for living hall" }
+    ];
 
     /* ================================================================
-       PERSISTENCE — uses Claude's private per-account storage when
-       available (syncs across your devices, not editable by anyone
-       else who opens the link). Falls back to this browser's local
-       storage only if that API isn't present (e.g. hosted elsewhere).
+       DATA CONVERTERS
     ================================================================= */
-    function readLocalFallback() {
-      try {
-        const raw = localStorage.getItem(STORAGE_ITEMS_KEY);
-        const budget = localStorage.getItem(STORAGE_BUDGET_KEY);
-        return { items: raw ? JSON.parse(raw) : null, budget: budget ? Number(budget) : null };
-      } catch (e) { return { items: null, budget: null }; }
+    function rowToItem(r) {
+      return {
+        id: r.id,
+        item: r.item || r.item_name || '',
+        category: r.category || 'Loose Furniture & Decor',
+        room: r.room || '',
+        floor: r.floor || 'Ground Floor',
+        unitPrice: Number(r.unit_price ?? r.unitPrice ?? 0),
+        actualPrice: r.actual_price == null ? null : Number(r.actual_price),
+        qty: Number(r.qty || 1),
+        paid: Number(r.paid || 0),
+        paymentStatus: r.payment_status || r.paymentStatus || 'Not Paid',
+        link: r.link || '',
+        status: r.status || 'Wishlist',
+        notes: r.notes || ''
+      };
+    }
+
+    function itemToRow(i) {
+      return {
+        id: i.id,
+        item: i.item,
+        category: i.category,
+        room: i.room || '',
+        floor: i.floor,
+        unit_price: Number(i.unitPrice || 0),
+        actual_price: i.actualPrice == null || i.actualPrice === '' ? null : Number(i.actualPrice),
+        qty: Number(i.qty || 1),
+        paid: Number(i.paid || 0),
+        payment_status: i.paymentStatus || 'Not Paid',
+        status: i.status || 'Wishlist',
+        link: i.link || '',
+        notes: i.notes || '',
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser ? currentUser.id : null
+      };
+    }
+
+    /* ================================================================
+       INITIALIZATION & DATABASE LOGIC
+    ================================================================= */
+    function forceContinue() {
+      document.getElementById('loading-screen').style.display = 'none';
+      renderApp();
     }
 
     async function loadData() {
-      const fallback = readLocalFallback();
-      const skipBtnTimer = setTimeout(() => {
-        const btn = document.getElementById('loading-skip');
-        if (btn) btn.style.display = 'inline-flex';
-      }, 3000);
-      const failsafe = setTimeout(() => {
-        // Absolute safety net: no matter what, don't leave the user staring
-        // at "Loading..." forever if the storage bridge is slow to init.
-        if (document.getElementById('loading-screen').style.display !== 'none') {
-          items = items && items.length ? items : (fallback.items || initialDataset);
-          targetBudget = targetBudget || fallback.budget || 60000;
-          setSyncPill(false);
-          document.getElementById('loading-screen').style.display = 'none';
-          renderApp();
-          showToast('Opened offline — will retry syncing');
-        }
-      }, 6000);
-
-      try {
-        if (hasCloudStorage) {
-          const itemsRes = await withTimeout(window.storage.get('reno_fitting_items', true), 4000).catch(() => null);
-          const budgetRes = await withTimeout(window.storage.get('reno_target_budget', true), 4000).catch(() => null);
-          items = itemsRes ? JSON.parse(itemsRes.value) : (fallback.items || initialDataset);
-          targetBudget = budgetRes ? JSON.parse(budgetRes.value) : (fallback.budget || 60000);
-          setSyncPill(true);
-        } else {
-          items = fallback.items || initialDataset;
-          targetBudget = fallback.budget || 60000;
-          setSyncPill(false);
-        }
-      } catch (e) {
-        items = fallback.items || initialDataset;
-        targetBudget = fallback.budget || 60000;
+      if (!supabaseConfigured) {
+        items = initialDataset;
         setSyncPill(false);
+        document.getElementById('loading-screen').style.display = 'none';
+        renderApp();
+        showToast('Add your Supabase keys to enable shared live data');
+        return;
       }
-      clearTimeout(failsafe);
-      clearTimeout(skipBtnTimer);
+
+      const { data: { session } } = await db.auth.getSession();
+      currentUser = session?.user || null;
+      document.getElementById('signout-btn').style.display = currentUser ? 'inline-flex' : 'none';
+      if (!currentUser) {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('authModal').style.display = 'flex';
+        setSyncPill(false);
+        return;
+      }
+
+      document.getElementById('authModal').style.display = 'none';
+      await refreshFromDatabase();
+      await subscribeToChanges();
+    }
+
+    async function refreshFromDatabase() {
+      const { data: itemRows, error: itemError } = await db
+        .from('renovation_items')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (itemError) {
+        console.error("Fetch error:", itemError);
+        showToast('Could not load shared data');
+      } else if (itemRows && itemRows.length) {
+        items = itemRows.map(rowToItem);
+      } else {
+        const rows = initialDataset.map(itemToRow);
+        const { error } = await db.from('renovation_items').insert(rows);
+        if (!error) items = initialDataset;
+      }
+
+      const { data: settings } = await db
+        .from('renovation_settings')
+        .select('target_budget')
+        .eq('id', 1)
+        .maybeSingle();
+
+      targetBudget = settings?.target_budget ?? 60000;
+      setSyncPill(true);
       document.getElementById('loading-screen').style.display = 'none';
       renderApp();
-      if (hasCloudStorage) startLiveSync();
     }
 
-    function forceContinue() {
-      const fallback = readLocalFallback();
-      if (!items || !items.length) items = fallback.items || initialDataset;
-      if (!targetBudget) targetBudget = fallback.budget || 60000;
-      setSyncPill(false);
-      document.getElementById('loading-screen').style.display = 'none';
-      renderApp();
-      showToast('Opened offline — will retry syncing');
-    }
-
-    // Races a promise against a timeout so a hung storage bridge can't
-    // freeze the app — resolves to null instead of waiting forever.
-    function withTimeout(promise, ms) {
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => resolve(null), ms);
-        promise.then((v) => { clearTimeout(timer); resolve(v); }, (e) => { clearTimeout(timer); reject(e); });
-      });
-    }
-
-    let lastKnownItemsJSON = null;
-    function startLiveSync() {
-      lastKnownItemsJSON = JSON.stringify(items);
-      setInterval(async () => {
-        // don't yank data out from under someone mid-edit
-        if (document.getElementById('itemModal').style.display === 'flex') return;
-        if (document.getElementById('budget-input')) return;
-        try {
-          const itemsRes = await withTimeout(window.storage.get('reno_fitting_items', true), 4000).catch(() => null);
-          const budgetRes = await withTimeout(window.storage.get('reno_target_budget', true), 4000).catch(() => null);
-          const freshItemsJSON = itemsRes ? itemsRes.value : null;
-          if (freshItemsJSON && freshItemsJSON !== lastKnownItemsJSON) {
-            items = JSON.parse(freshItemsJSON);
-            lastKnownItemsJSON = freshItemsJSON;
-            if (budgetRes) targetBudget = JSON.parse(budgetRes.value);
-            renderApp();
-            showToast('Updated by a collaborator');
-          }
-        } catch (e) { /* ignore transient errors */ }
-      }, 8000);
+    async function subscribeToChanges() {
+      if (realtimeChannel) await db.removeChannel(realtimeChannel);
+      realtimeChannel = db.channel('reno-live-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'renovation_items' }, async () => {
+          await refreshFromDatabase();
+          showToast('Updated by a collaborator');
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'renovation_settings' }, async () => {
+          await refreshFromDatabase();
+        })
+        .subscribe();
     }
 
     function setSyncPill(cloud) {
       const text = document.getElementById('sync-pill-text');
-      if (cloud) {
-        text.textContent = 'Shared & live — anyone with this link sees the same data';
-      } else {
-        text.textContent = 'Saved on this device only (browser storage)';
-      }
+      text.textContent = cloud
+        ? `Live shared data • ${currentUser?.email || 'Signed in'}`
+        : 'Demo mode — Supabase not connected';
     }
 
-    async function persist() {
-      try {
-        if (hasCloudStorage) {
-          await window.storage.set('reno_fitting_items', JSON.stringify(items), true);
-          await window.storage.set('reno_target_budget', JSON.stringify(targetBudget), true);
-          lastKnownItemsJSON = JSON.stringify(items);
-        } else {
-          localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(items));
-          localStorage.setItem(STORAGE_BUDGET_KEY, String(targetBudget));
-        }
-        showToast('Saved');
-      } catch (e) {
-        try {
-          localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(items));
-          localStorage.setItem(STORAGE_BUDGET_KEY, String(targetBudget));
-          showToast('Saved to this device only');
-        } catch (e2) {
-          showToast('Could not save — check storage');
-        }
-      }
+    async function saveSingleItem(item) {
+      const { error } = await db.from('renovation_items').upsert(itemToRow(item));
+      if (error) throw error;
     }
+
+    async function deleteSingleItem(id) {
+      const { error } = await db.from('renovation_items').delete().eq('id', id);
+      if (error) throw error;
+    }
+
+    function signOut() {
+      if (db) db.auth.signOut();
+    }
+
+    /* ================================================================
+       AUTHENTICATION
+    ================================================================= */
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!db) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const msg = document.getElementById('auth-message');
+      msg.textContent = 'Signing in…';
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      msg.textContent = error ? error.message : 'Signed in.';
+      if (!error) await loadData();
+    });
+
+    document.getElementById('auth-signup').addEventListener('click', async () => {
+      if (!db) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const msg = document.getElementById('auth-message');
+      if (!email || password.length < 6) {
+        msg.textContent = 'Enter an email and a password of at least 6 characters.';
+        return;
+      }
+      msg.textContent = 'Creating account…';
+      const { error } = await db.auth.signUp({ email, password });
+      msg.textContent = error ? error.message : 'Account created. Check your email if confirmation is enabled.';
+    });
+
+    db?.auth.onAuthStateChange(async (_event, session) => {
+      currentUser = session?.user || null;
+      document.getElementById('signout-btn').style.display = currentUser ? 'inline-flex' : 'none';
+      if (currentUser) {
+        document.getElementById('authModal').style.display = 'none';
+        await refreshFromDatabase();
+        await subscribeToChanges();
+      }
+    });
 
     let toastTimer;
     function showToast(msg) {
@@ -768,17 +879,167 @@
     }
 
     /* ================================================================
+       MODAL & ITEM CRUD
+    ================================================================= */
+    function openModal() {
+      document.getElementById('item-id').value = ''; 
+      document.getElementById('item-form').reset();  
+      document.getElementById('modal-title').textContent = 'Add New Fitting Item';
+      document.getElementById('itemModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function editItem(id) {
+      const item = items.find(i => String(i.id) === String(id));
+      if (!item) {
+        console.error("Could not find item with ID:", id, "in list:", items);
+        return;
+      }
+
+      document.getElementById('item-id').value = item.id;
+      document.getElementById('modal-title').textContent = 'Edit Fitting Item';
+
+      document.getElementById('item-name').value = item.item || '';
+      document.getElementById('item-category').value = item.category || 'Loose Furniture & Decor';
+      document.getElementById('item-floor').value = item.floor || 'Ground Floor';
+      document.getElementById('item-room').value = item.room || '';
+      document.getElementById('item-price').value = item.unitPrice ?? '';
+      document.getElementById('item-qty').value = item.qty ?? 1;
+      document.getElementById('item-actual-price').value = item.actualPrice ?? '';
+      document.getElementById('item-paid').value = item.paid ?? 0;
+      document.getElementById('item-payment-status').value = item.paymentStatus || 'Not Paid';
+      document.getElementById('item-status').value = item.status || 'Wishlist';
+      document.getElementById('item-link').value = item.link || '';
+      document.getElementById('item-notes').value = item.notes || '';
+
+      document.getElementById('itemModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('itemModal').style.display = 'none';
+      document.getElementById('item-form').reset();
+      document.getElementById('item-id').value = '';
+      document.body.style.overflow = '';
+    }
+
+    async function saveItem(event) {
+      event.preventDefault();
+
+      const existingId = document.getElementById('item-id').value;
+      const actualPriceVal = document.getElementById('item-actual-price').value;
+
+      const newItem = {
+        id: existingId ? (isNaN(existingId) ? existingId : Number(existingId)) : Date.now(),
+        item: document.getElementById('item-name').value.trim(),
+        category: document.getElementById('item-category').value,
+        floor: document.getElementById('item-floor').value,
+        room: document.getElementById('item-room').value.trim(),
+        unitPrice: parseFloat(document.getElementById('item-price').value) || 0,
+        actualPrice: actualPriceVal === '' ? null : parseFloat(actualPriceVal),
+        qty: parseInt(document.getElementById('item-qty').value) || 1,
+        paid: parseFloat(document.getElementById('item-paid').value) || 0,
+        paymentStatus: document.getElementById('item-payment-status').value,
+        status: document.getElementById('item-status').value,
+        link: document.getElementById('item-link').value.trim(),
+        notes: document.getElementById('item-notes').value.trim()
+      };
+
+      if (db) {
+        if (!currentUser) {
+          showToast('Please sign in first');
+          return;
+        }
+        try {
+          await saveSingleItem(newItem);
+          const index = items.findIndex(i => String(i.id) === String(newItem.id));
+          if (index !== -1) items[index] = newItem;
+          else items.push(newItem);
+
+          closeModal();
+          renderApp();
+          showToast(existingId ? 'Item updated in shared tracker' : 'New item saved to shared tracker');
+        } catch (e) {
+          console.error("Save error:", e);
+          showToast('Could not save item');
+        }
+      } else {
+        const index = items.findIndex(i => String(i.id) === String(newItem.id));
+        if (index !== -1) items[index] = newItem;
+        else items.push(newItem);
+
+        closeModal();
+        renderApp();
+        showToast(existingId ? 'Item updated locally' : 'New item added locally');
+      }
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Are you sure you want to delete this fitting item?')) return;
+      if (db) {
+        try {
+          await deleteSingleItem(id);
+          items = items.filter(i => String(i.id) !== String(id));
+          renderApp();
+          showToast('Deleted from shared tracker');
+        } catch (e) {
+          console.error("Delete error:", e);
+          showToast('Could not delete item');
+        }
+      } else {
+        items = items.filter(i => String(i.id) !== String(id));
+        renderApp();
+        showToast('Deleted item');
+      }
+    }
+
+    /* ================================================================
+       BUDGET EDIT
+    ================================================================= */
+    function editBudget() {
+      const box = document.getElementById('budget-stat-box');
+      if (box.querySelector('input')) return;
+      const display = document.getElementById('target-budget-display');
+      const current = targetBudget;
+      display.innerHTML = `<input type="number" id="budget-input" value="${current}" inputmode="decimal">`;
+      const input = document.getElementById('budget-input');
+      input.focus();
+      input.select();
+
+      const commit = async () => {
+        const val = parseFloat(input.value);
+        targetBudget = isNaN(val) ? current : val;
+        display.innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
+        
+        if (db && currentUser) {
+          await db.from('renovation_settings').upsert({
+            id: 1,
+            target_budget: Number(targetBudget),
+            updated_at: new Date().toISOString(),
+            updated_by: currentUser.id
+          });
+          showToast('Budget updated in cloud');
+        }
+        renderApp();
+      };
+
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+      input.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    /* ================================================================
        RENDER
     ================================================================= */
     function renderApp() {
-      const searchQuery = document.getElementById('search-input').value.toLowerCase();
-      const catFilter = document.getElementById('filter-category').value;
-      const floorFilter = document.getElementById('filter-floor').value;
-      const statusFilter = document.getElementById('filter-status').value;
+      const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase();
+      const catFilter = document.getElementById('filter-category')?.value || '';
+      const floorFilter = document.getElementById('filter-floor')?.value || '';
+      const statusFilter = document.getElementById('filter-status')?.value || '';
 
       const filtered = items.filter(item => {
-        const matchesSearch = item.item.toLowerCase().includes(searchQuery) ||
-                              item.room.toLowerCase().includes(searchQuery) ||
+        const matchesSearch = (item.item || '').toLowerCase().includes(searchQuery) ||
+                              (item.room || '').toLowerCase().includes(searchQuery) ||
                               (item.link && item.link.toLowerCase().includes(searchQuery));
         const matchesCat = !catFilter || item.category === catFilter;
         const matchesFloor = !floorFilter || item.floor === floorFilter;
@@ -786,40 +1047,49 @@
         return matchesSearch && matchesCat && matchesFloor && matchesStatus;
       });
 
-      const totalCost = items.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-      const variance = targetBudget - totalCost;
-      const totalUnits = items.reduce((sum, item) => sum + item.qty, 0);
-      const purchasedItems = items.filter(i => i.status === 'Ordered' || i.status === 'Delivered' || i.status === 'Installed').length;
+      const estimatedTotal = items.reduce((sum, item) => sum + (Number(item.unitPrice || 0) * Number(item.qty || 0)), 0);
+      const actualTotal = items.reduce((sum, item) => sum + ((item.actualPrice == null ? 0 : Number(item.actualPrice)) * Number(item.qty || 0)), 0);
+      const paidTotal = items.reduce((sum, item) => sum + Number(item.paid || 0), 0);
+      const outstanding = Math.max(0, actualTotal - paidTotal);
+      const variance = targetBudget - estimatedTotal;
+      const totalUnits = items.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+      const orderedItems = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).length;
+      const orderedUnits = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).reduce((sum,i) => sum + Number(i.qty || 0), 0);
 
-      document.getElementById('target-budget-display').innerText = 'RM ' + targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
-      document.getElementById('grand-total-display').innerText = 'RM ' + totalCost.toLocaleString('en-MY', {minimumFractionDigits: 2});
-      document.getElementById('card-total').innerText = 'RM ' + totalCost.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('target-budget-display').innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
+      document.getElementById('grand-total-display').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-total').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-actual').innerText = 'RM ' + actualTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-paid').innerText = 'RM ' + paidTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
+      document.getElementById('card-outstanding').innerText = 'RM ' + outstanding.toLocaleString('en-MY', {minimumFractionDigits: 2});
       document.getElementById('card-variance').innerText = 'RM ' + variance.toLocaleString('en-MY', {minimumFractionDigits: 2});
       document.getElementById('card-variance').style.color = variance < 0 ? 'var(--danger)' : 'var(--olive-green)';
       document.getElementById('card-count').innerText = items.length;
       document.getElementById('card-count-sub').innerText = totalUnits + ' units total';
-      document.getElementById('card-ordered-count').innerText = `${purchasedItems} / ${items.length}`;
+      document.getElementById('card-ordered-count').innerText = `${orderedItems} / ${items.length}`;
+      document.getElementById('card-ordered-units').innerText = `${orderedUnits} units ordered / delivered / installed`;
 
-      renderCategorySummary(totalCost);
+      renderCategorySummary(estimatedTotal);
 
       const tbody = document.getElementById('items-tbody');
       tbody.innerHTML = '';
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No fittings match your filters.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">No fittings match your filters.</div></td></tr>`;
         return;
       }
 
       filtered.forEach(item => {
-        const rowTotal = item.unitPrice * item.qty;
-        const statusClass = `badge-${item.status.toLowerCase().replace(/\s+/g, '-')}`;
+        const rowTotal = Number(item.unitPrice || 0) * Number(item.qty || 0);
+        const actualRowTotal = (item.actualPrice == null ? 0 : Number(item.actualPrice)) * Number(item.qty || 0);
+        const statusClass = `badge-${(item.status || 'Wishlist').toLowerCase().replace(/\s+/g, '-')}`;
 
         let linkDisplay = '—';
         if (item.link) {
           if (item.link.startsWith('http')) {
-            linkDisplay = `<a href="${item.link}" target="_blank" style="color: var(--primary-wood); text-decoration: underline;">View link</a>`;
+            linkDisplay = `<a href="${escapeHtml(item.link)}" target="_blank" style="color: var(--primary-wood); text-decoration: underline;">View link</a>`;
           } else {
-            linkDisplay = item.link;
+            linkDisplay = escapeHtml(item.link);
           }
         }
 
@@ -831,17 +1101,19 @@
           </td>
           <td data-label="Category"><small>${escapeHtml(item.category)}</small></td>
           <td data-label="Room"><strong>${escapeHtml(item.room)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(item.floor)}</small></td>
-          <td data-label="Unit Price">RM ${item.unitPrice.toLocaleString('en-MY', {minimumFractionDigits: 2})}</td>
+          <td data-label="Unit Price">RM ${Number(item.unitPrice || 0).toLocaleString('en-MY', {minimumFractionDigits: 2})}</td>
           <td data-label="Qty">${item.qty}</td>
           <td data-label="Total"><strong>RM ${rowTotal.toLocaleString('en-MY', {minimumFractionDigits: 2})}</strong></td>
-          <td data-label="Status"><span class="badge ${statusClass}">${item.status}</span></td>
-          <td data-label="Link"><small>${linkDisplay}</small></td>
+          <td data-label="Actual"><strong>${item.actualPrice == null ? '—' : 'RM ' + actualRowTotal.toLocaleString('en-MY', {minimumFractionDigits: 2})}</strong></td>
+          <td data-label="Paid">RM ${Number(item.paid || 0).toLocaleString('en-MY', {minimumFractionDigits: 2})}</td>
+          <td data-label="Status"><span class="badge ${statusClass}">${escapeHtml(item.status)}</span></td>
+          <td data-label="Link"><small>${linkDisplay}</small><br><small style="color:var(--text-muted);">${escapeHtml(item.paymentStatus || 'Not Paid')}</small></td>
           <td class="cell-actions">
             <div class="row-actions">
-              <button class="btn btn-outline btn-icon" onclick="editItem(${item.id})" aria-label="Edit">
-                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              <button class="btn btn-outline btn-icon" onclick="editItem('${item.id}')" aria-label="Edit">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
-              <button class="btn btn-outline btn-icon btn-danger-outline" onclick="deleteItem(${item.id})" aria-label="Delete">
+              <button class="btn btn-outline btn-icon btn-danger-outline" onclick="deleteItem('${item.id}')" aria-label="Delete">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
               </button>
             </div>
@@ -872,7 +1144,7 @@
 
       categories.forEach(cat => {
         const catItems = items.filter(i => i.category === cat);
-        const catTotal = catItems.reduce((sum, i) => sum + (i.unitPrice * i.qty), 0);
+        const catTotal = catItems.reduce((sum, i) => sum + (Number(i.unitPrice || 0) * Number(i.qty || 0)), 0);
         const percentage = grandTotal > 0 ? ((catTotal / grandTotal) * 100).toFixed(1) : 0;
 
         if (catTotal > 0) {
@@ -899,116 +1171,25 @@
       });
     }
 
-    /* ================================================================
-       BUDGET EDIT
-    ================================================================= */
-    function editBudget() {
-      const box = document.getElementById('budget-stat-box');
-      if (box.querySelector('input')) return;
-      const display = document.getElementById('target-budget-display');
-      const current = targetBudget;
-      display.innerHTML = `<input type="number" id="budget-input" value="${current}" inputmode="decimal">`;
-      const input = document.getElementById('budget-input');
-      input.focus();
-      input.select();
-      const commit = () => {
-        const val = parseFloat(input.value);
-        targetBudget = isNaN(val) ? current : val;
-        display.innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
-        persist();
-        renderApp();
-      };
-      input.addEventListener('blur', commit);
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
-      input.addEventListener('click', (e) => e.stopPropagation());
-    }
-
-    /* ================================================================
-       MODAL / CRUD
-    ================================================================= */
-    function openModal(editId = null) {
-      document.getElementById('item-form').reset();
-      document.getElementById('item-id').value = '';
-      document.getElementById('modal-title').innerText = 'Add New Fitting Item';
-
-      if (editId) {
-        const item = items.find(i => i.id === editId);
-        if (item) {
-          document.getElementById('modal-title').innerText = 'Edit Fitting Item';
-          document.getElementById('item-id').value = item.id;
-          document.getElementById('item-name').value = item.item;
-          document.getElementById('item-category').value = item.category;
-          document.getElementById('item-floor').value = item.floor;
-          document.getElementById('item-room').value = item.room;
-          document.getElementById('item-price').value = item.unitPrice;
-          document.getElementById('item-qty').value = item.qty;
-          document.getElementById('item-status').value = item.status;
-          document.getElementById('item-link').value = item.link || '';
-          document.getElementById('item-notes').value = item.notes || '';
-        }
-      }
-      document.getElementById('itemModal').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-      document.getElementById('itemModal').style.display = 'none';
-      document.body.style.overflow = '';
-    }
-
-    function saveItem(event) {
-      event.preventDefault();
-      const id = document.getElementById('item-id').value;
-      const newItem = {
-        id: id ? parseInt(id) : Date.now(),
-        item: document.getElementById('item-name').value,
-        category: document.getElementById('item-category').value,
-        floor: document.getElementById('item-floor').value,
-        room: document.getElementById('item-room').value,
-        unitPrice: parseFloat(document.getElementById('item-price').value) || 0,
-        qty: parseInt(document.getElementById('item-qty').value) || 1,
-        status: document.getElementById('item-status').value,
-        link: document.getElementById('item-link').value,
-        notes: document.getElementById('item-notes').value
-      };
-
-      if (id) {
-        const index = items.findIndex(i => i.id === parseInt(id));
-        if (index !== -1) items[index] = newItem;
-      } else {
-        items.push(newItem);
-      }
-
-      closeModal();
-      persist();
-      renderApp();
-    }
-
-    function editItem(id) { openModal(id); }
-
-    function deleteItem(id) {
-      if (confirm('Are you sure you want to delete this fitting item?')) {
-        items = items.filter(i => i.id !== id);
-        persist();
-        renderApp();
-      }
-    }
-
     function exportCSV() {
       let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Item,Category,Floor Level,Room/Location,Unit Price (MYR),Quantity,Total Price (MYR),Status,Link/Vendor,Notes\n";
+      csvContent += "Item,Category,Floor Level,Room/Location,Estimated Unit Price (MYR),Quantity,Estimated Total (MYR),Actual Unit Price (MYR),Actual Total (MYR),Paid (MYR),Payment Status,Status,Link/Vendor,Notes\n";
 
       items.forEach(i => {
-        const total = i.unitPrice * i.qty;
+        const total = Number(i.unitPrice || 0) * Number(i.qty || 0);
         const row = [
-          `"${i.item.replace(/"/g, '""')}"`,
-          `"${i.category}"`,
-          `"${i.floor}"`,
-          `"${i.room}"`,
-          i.unitPrice,
-          i.qty,
+          `"${(i.item || '').replace(/"/g, '""')}"`,
+          `"${i.category || ''}"`,
+          `"${i.floor || ''}"`,
+          `"${i.room || ''}"`,
+          i.unitPrice || 0,
+          i.qty || 1,
           total,
-          `"${i.status}"`,
+          i.actualPrice == null ? '' : i.actualPrice,
+          i.actualPrice == null ? '' : (i.actualPrice * i.qty),
+          i.paid || 0,
+          `"${i.paymentStatus || 'Not Paid'}"`,
+          `"${i.status || 'Wishlist'}"`,
           `"${(i.link || '').replace(/"/g, '""')}"`,
           `"${(i.notes || '').replace(/"/g, '""')}"`
         ].join(",");
@@ -1025,10 +1206,12 @@
       showToast('CSV exported');
     }
 
-    // Intentionally do NOT close the modal when clicking the backdrop.
-    // This prevents accidental closure while selecting text or clicking outside
-    // the modal content. Close via the X, Cancel, or Save buttons instead.
+    // Modal backdrop click handling
+    document.getElementById('itemModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
 
+    // Start application
     loadData();
   </script>
 </body>
