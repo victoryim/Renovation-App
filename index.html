@@ -408,7 +408,7 @@
     <div class="budget-banner">
       <div class="stat-box editable" id="budget-stat-box" onclick="editBudget()">
         <div class="stat-label">Target Budget (MYR)</div>
-        <div class="stat-value" id="target-budget-display">60,000</div>
+        <div class="stat-value" id="target-budget-display">RM 60,000</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Estimated Total</div>
@@ -1056,7 +1056,7 @@
       const orderedItems = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).length;
       const orderedUnits = items.filter(i => ['Ordered','Delivered','Installed'].includes(i.status)).reduce((sum,i) => sum + Number(i.qty || 0), 0);
 
-      document.getElementById('target-budget-display').innerText = targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
+      document.getElementById('target-budget-display').innerText = 'RM ' + targetBudget.toLocaleString('en-MY', {minimumFractionDigits: 0});
       document.getElementById('grand-total-display').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
       document.getElementById('card-total').innerText = 'RM ' + estimatedTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
       document.getElementById('card-actual').innerText = 'RM ' + actualTotal.toLocaleString('en-MY', {minimumFractionDigits: 2});
@@ -1207,8 +1207,14 @@
     }
 
     // Modal backdrop click handling
-    document.getElementById('itemModal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
+    let modalMouseDownOnBackdrop = false;
+document.getElementById('itemModal').addEventListener('mousedown', function(e) {
+  modalMouseDownOnBackdrop = (e.target === this);
+});
+document.getElementById('itemModal').addEventListener('click', function(e) {
+  if (e.target === this && modalMouseDownOnBackdrop) closeModal();
+  modalMouseDownOnBackdrop = false;
+});
     });
 
     // Start application
