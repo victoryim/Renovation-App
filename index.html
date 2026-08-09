@@ -1205,20 +1205,21 @@
       document.body.removeChild(link);
       showToast('CSV exported');
     }
+// Modal backdrop click handling
+let modalMouseDownOnBackdrop = false;
 
-    // Modal backdrop click handling
-    let modalMouseDownOnBackdrop = false;
 document.getElementById('itemModal').addEventListener('mousedown', function(e) {
   modalMouseDownOnBackdrop = (e.target === this);
 });
+
 document.getElementById('itemModal').addEventListener('click', function(e) {
   if (e.target === this && modalMouseDownOnBackdrop) closeModal();
   modalMouseDownOnBackdrop = false;
 });
-    });
 
-    // Start application
-    loadData();
+// Start application
+loadData();
+
   </script>
 </body>
 </html>
